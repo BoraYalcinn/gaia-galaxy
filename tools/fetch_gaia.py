@@ -4,7 +4,7 @@ query = """
 SELECT source_id, ra, dec, parallax, parallax_over_error,
        phot_g_mean_mag, bp_rp
 FROM gaiadr3.gaia_source
-WHERE random_index < 5000000    
+WHERE random_index < 10000000    
     AND parallax_over_error > 5
     AND bp_rp IS NOT NULL
     ORDER BY random_index
