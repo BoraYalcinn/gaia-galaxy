@@ -12,7 +12,6 @@ Renderer::~Renderer()
     if(vao != 0)glDeleteBuffers(1,&vao);
 }
 
-Renderer::Renderer(const Renderer&) = delete;
 
 void Renderer::init(const std::vector<float>& stars)
 {
