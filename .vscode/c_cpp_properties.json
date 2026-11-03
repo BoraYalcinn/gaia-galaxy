@@ -1,0 +1,23 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+            "includePath": [
+                "${workspaceFolder}/src/**",
+                "/usr/include/c++/15",
+                "/usr/include/x86_64-linux-gnu/c++/15",
+                "/usr/include/c++/15/backward",
+                "/usr/lib/gcc/x86_64-linux-gnu/15/include",
+                "/usr/local/include",
+                "/usr/include/x86_64-linux-gnu",
+                "/usr/include"
+            ]
+        }
+    ]
+}
