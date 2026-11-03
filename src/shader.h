@@ -16,6 +16,15 @@ class Shader{
 
         std::string ReadFile(const char* fileLocation);
 
+        void UseShader();
+        void ClearShader();
+
+        ~Shader();
+    
+    private:
+
+        void CompileShader(const char* vertexCode, const char* fragmentCode);
+	    void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
 
 };
 
