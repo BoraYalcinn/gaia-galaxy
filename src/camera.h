@@ -14,7 +14,9 @@ class Camera{
 
         void keyControl(bool* keys,GLfloat deltaTime);
         void mouseControl(GLfloat xChange,GLfloat yChange);
-
+        void setMoveSpeed(GLfloat speed);
+        GLfloat getMoveSpeed() const;
+        
         glm::vec3 getCameraPosition();
         glm::vec3 getCameraDirection();
 

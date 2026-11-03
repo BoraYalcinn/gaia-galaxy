@@ -25,6 +25,16 @@ void Camera::mouseControl(GLfloat xChange,GLfloat yChange)
 	Update();
 }
 
+void Camera::setMoveSpeed(GLfloat speed)
+{
+    moveSpeed = speed;
+}
+
+GLfloat Camera::getMoveSpeed() const
+{
+    return moveSpeed;
+}
+
 void Camera::keyControl(bool* keys,GLfloat deltaTime)
 {
     GLfloat velocity = moveSpeed * deltaTime;

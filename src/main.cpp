@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <vector>
+#include <cmath>
 
 #include "camera.h"
 #include "renderer.h"
@@ -46,6 +47,15 @@ static void mouseCallback(GLFWwindow* /*window*/, double xpos, double ypos)
     lastY = ypos;
 
     camera.mouseControl(static_cast<GLfloat>(xChange), static_cast<GLfloat>(yChange));
+}
+
+static void scrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset)
+{
+    // Each scroll step multiplies the speed by 1.2 (or divides when scrolling back).
+    float speed = camera.getMoveSpeed() * std::pow(1.2f, static_cast<float>(yoffset));
+    speed = glm::clamp(speed, 1.0f, 5000.0f);
+    camera.setMoveSpeed(speed);
+    std::printf("Move speed: %.1f pc/s\n", speed);
 }
 
 int main()
@@ -94,8 +104,10 @@ int main()
 
     // Input setup.
     glfwSetKeyCallback(window, keyCallback);
+    glfwSetScrollCallback(window, scrollCallback);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
     // Scope: Shader and Renderer free their GL objects in their destructors,
     // which must run before the GL context is destroyed.
