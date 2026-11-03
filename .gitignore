@@ -219,8 +219,41 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# C++ build
+# C/C++ build artifacts
 build/
+build-*/
+cmake-build-*/
+out/
+*.o
+*.obj
+*.a
+*.lib
+*.d
+*.gch
+*.pch
+
+# CMake (in-source configure leftovers)
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+_deps/
+compile_commands.json
+
+# clangd / ccls index
+.cache/
+.ccls-cache/
+
+# Editors & OS
+.idea/
+*.swp
+*~
+.DS_Store
+.vscode/ipch/
+.vscode/browse.vc.db*
 
 # Gaia data
 data/
