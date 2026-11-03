@@ -72,13 +72,13 @@ void Shader::CompileShader(const char* vertexCode,const char* fragmentCode)
 
 void Shader::SetFloat(const char* name, float value)
 {
-	GLuint loc = glGetUniformLocation(shaderID,name);
-	glUniform1d(loc,value);	
+	GLint loc = glGetUniformLocation(shaderID,name);
+	glUniform1f(loc,value);	
 }
 
 void Shader::SetMat4(const char* name, const glm::mat4& value)
 {
-	GLuint loc = glGetUniformLocation(shaderID,name);
+	GLint loc = glGetUniformLocation(shaderID,name);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 }
 

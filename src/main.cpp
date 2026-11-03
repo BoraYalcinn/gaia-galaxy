@@ -117,11 +117,15 @@ int main()
         glDisable(GL_DEPTH_TEST);
 
         double lastTime = glfwGetTime();
+        float refMag = 16.0f;
 
         while (!glfwWindowShouldClose(window)) {
             double now = glfwGetTime();
             float deltaTime = static_cast<float>(now - lastTime);
             lastTime = now;
+
+            if (keys[GLFW_KEY_UP])   refMag += 4.0f * deltaTime;
+            if (keys[GLFW_KEY_DOWN]) refMag -= 4.0f * deltaTime;
 
             glfwPollEvents();
             camera.keyControl(keys, deltaTime);
@@ -141,7 +145,7 @@ int main()
             shader.UseShader();
             shader.SetMat4("uView", camera.calculateViewMatrix());
             shader.SetMat4("uProjection", projection);
-            shader.SetFloat("uRefMag", 10.0f);
+            shader.SetFloat("uRefMag", refMag);
             shader.SetFloat("uPointScale", 3.0f);
 
             renderer.draw();

@@ -9,7 +9,7 @@ namespace
 Renderer::~Renderer()
 {
     if(vbo != 0)glDeleteBuffers(1,&vbo);
-    if(vao != 0)glDeleteBuffers(1,&vao);
+    if(vao != 0)glDeleteVertexArrays(1,&vao);
 }
 
 
