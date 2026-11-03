@@ -11,6 +11,8 @@
 class Shader{
 
     public:
+
+        Shader();
         
         void CreateFromString(const char* vertexCode,const char* fragmentCode);
         void CreateFromFile(const char* vertexLocation,const char* fragmentLocation);
