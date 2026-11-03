@@ -1,9 +1,15 @@
 #include <GL/glew.h>     // must come before glfw3.h
 #include <GLFW/glfw3.h>
 
+#include "star_loader.h"
+
+#include <vector>
 #include <cstdio>
 
 int main(){
+
+    std::vector<float> stars = loadStars("data/stars.bin");
+    std::printf("Loaded %zu stars\n", stars.size() / STAR_FLOATS);
 
     glfwInitHint(GLFW_PLATFORM,GLFW_PLATFORM_X11);
 
@@ -12,6 +18,7 @@ int main(){
         return 1;
     }
 
+    std::printf("GPU: %s\n", glGetString(GL_RENDERER));
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
