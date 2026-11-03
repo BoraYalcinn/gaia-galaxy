@@ -18,7 +18,7 @@ int main(){
         return 1;
     }
 
-    std::printf("GPU: %s\n", glGetString(GL_RENDERER));
+    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -42,7 +42,9 @@ int main(){
     }
 
     std::printf("OpenGL %s\n",glGetString(GL_VERSION));
-
+    std::printf("OpenGL %s\n", glGetString(GL_VERSION));
+    std::printf("GPU: %s\n", glGetString(GL_RENDERER));
+    
     while(!glfwWindowShouldClose(window)){
         int w,h;
         glfwGetFramebufferSize(window,&w,&h);
