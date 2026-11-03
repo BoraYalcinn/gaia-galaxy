@@ -1,8 +1,9 @@
 #pragma once
 
 #include <stdio.h>
-#include <string>
-
+#include <string.h>
+#include <iostream>
+#include <fstream>
 
 #include <GL/glew.h>
 
@@ -15,6 +16,8 @@ class Shader{
         void CreateFromFile(const char* vertexLocation,const char* fragmentLocation);
 
         std::string ReadFile(const char* fileLocation);
+
+        GLuint shaderID = 0;
 
         void UseShader();
         void ClearShader();

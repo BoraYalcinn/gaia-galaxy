@@ -4,7 +4,7 @@
 Camera::Camera(){}
 
 Camera::Camera(glm::vec3 position,glm::vec3 up,GLfloat startYaw,GLfloat startPitch,GLfloat moveSpeed,GLfloat turnSpeed) 
-                    :  position(position), up(up), yaw(startYaw),pitch(startPitch),moveSpeed(moveSpeed),turnSpeed(turnSpeed)
+                :  position(position), up(up), worldUp(up),yaw(startYaw),pitch(startPitch),moveSpeed(moveSpeed),turnSpeed(turnSpeed)
 {
     this->front = glm::vec3(0.f,0.f,-1.f);
     this->Update();
