@@ -70,6 +70,18 @@ void Shader::CompileShader(const char* vertexCode,const char* fragmentCode)
 	}
 }
 
+void Shader::SetFloat(const char* name, float value)
+{
+	GLuint loc = glGetUniformLocation(shaderID,name);
+	glUniform1d(loc,value);	
+}
+
+void Shader::SetMat4(const char* name, const glm::mat4& value)
+{
+	GLuint loc = glGetUniformLocation(shaderID,name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+}
+
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 {
 	GLuint theShader = glCreateShader(shaderType);
