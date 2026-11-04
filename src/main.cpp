@@ -138,6 +138,14 @@ int main()
         Framebuffer hdr;
         hdr.create(fbW, fbH);
 
+        Shader composite;
+        composite.CreateFromFile("shaders/fullscreen.vert", "shaders/composite.frag");
+
+        GLuint emptyVao = 0;
+        glGenVertexArrays(1, &emptyVao);   // core profile needs a VAO even with no vertex data
+
+        float exposure = 1.0f;
+
         while (!glfwWindowShouldClose(window)) {
             double now = glfwGetTime();
             float deltaTime = static_cast<float>(now - lastTime);
@@ -145,6 +153,8 @@ int main()
 
             if (keys[GLFW_KEY_UP])   refMag += 4.0f * deltaTime;
             if (keys[GLFW_KEY_DOWN]) refMag -= 4.0f * deltaTime;
+            if (keys[GLFW_KEY_RIGHT]) exposure *= 1.0f + 1.5f * deltaTime;
+            if (keys[GLFW_KEY_LEFT])  exposure /= 1.0f + 1.5f * deltaTime;
 
             glfwPollEvents();
             camera.keyControl(keys, deltaTime);
@@ -152,10 +162,18 @@ int main()
             int w, h;
             glfwGetFramebufferSize(window, &w, &h);
             if (h == 0) continue;   // minimized
-            glViewport(0, 0, w, h);
 
-            glClearColor(0.0f, 0.0f, 0.02f, 1.0f);
+            if (w != hdr.width() || h != hdr.height()) {
+                hdr.create(w, h);   // window was resized
+            }
+
+            // --- Pass 1: draw the stars into the HDR texture ---
+            hdr.bind();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
 
             float aspect = static_cast<float>(w) / static_cast<float>(h);
             glm::mat4 projection =
@@ -166,13 +184,27 @@ int main()
             shader.SetMat4("uProjection", projection);
             shader.SetFloat("uRefMag", refMag);
             shader.SetFloat("uPointScale", 3.0f);
-
             renderer.draw();
+
+            // --- Pass 2: tone map the HDR texture onto the screen ---
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glViewport(0, 0, w, h);
+            glDisable(GL_BLEND);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            composite.UseShader();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
+            composite.SetFloat("uExposure", exposure);
+            glBindVertexArray(emptyVao);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glBindVertexArray(0);
 
             glfwSwapBuffers(window);
         }
+        glDeleteVertexArrays(1, &emptyVao);
     }
-
+    
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
