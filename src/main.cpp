@@ -4,15 +4,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <cmath>
 #include <cstdio>
 #include <vector>
-#include <cmath>
 
 #include "camera.h"
+#include "framebuffer.h"
 #include "renderer.h"
 #include "shader.h"
 #include "star_loader.h"
-#include "framebuffer.h"
 
 // --- Input state (written by GLFW callbacks, read in the main loop) ---
 static bool   keys[1024] = {};
@@ -54,22 +54,29 @@ static void scrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yo
 {
     // Each scroll step multiplies the speed by 1.2 (or divides when scrolling back).
     float speed = camera.getMoveSpeed() * std::pow(1.2f, static_cast<float>(yoffset));
-    speed = glm::clamp(speed, 1.0f, 5000.0f);
+    speed = glm::clamp(speed, 1.0f, 20000.0f);
     camera.setMoveSpeed(speed);
-    std::printf("Move speed: %.1f pc/s\n", speed);
 }
 
 int main()
 {
-
     // Load star data first (does not need OpenGL).
     std::vector<float> stars = loadStars("data/stars.bin");
-    std::vector<float> galaxy = loadStars("data/galaxy.bin");
     if (stars.empty()) {
         std::fprintf(stderr, "No stars loaded. Run the Python tools first.\n");
         return 1;
     }
-    std::printf("Loaded %zu stars\n", stars.size() / STAR_FLOATS);
+
+    // The procedural galaxy layer is optional.
+    std::vector<float> galaxy = loadStars("data/galaxy.bin");
+    const bool hasGalaxy = !galaxy.empty();
+    if (!hasGalaxy) {
+        std::fprintf(stderr, "No galaxy layer loaded (run tools/generate_galaxy.py).\n");
+    }
+
+    const size_t gaiaCount   = stars.size() / STAR_FLOATS;
+    const size_t galaxyCount = galaxy.size() / STAR_FLOATS;
+    std::printf("Loaded %zu Gaia stars and %zu procedural stars\n", gaiaCount, galaxyCount);
 
     // On a Wayland session GLEW (built for GLX) can fail to initialize,
     // so force the X11 backend (XWayland).
@@ -92,7 +99,7 @@ int main()
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);   
 
     glewExperimental = GL_TRUE;
     if (GLenum err = glewInit(); err != GLEW_OK) {
@@ -111,9 +118,8 @@ int main()
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
-    // Scope: Shader and Renderer free their GL objects in their destructors,
-    // which must run before the GL context is destroyed.
+    // Scope: Shader, Renderer and Framebuffer free their GL objects in their
+    // destructors, which must run before the GL context is destroyed.
     {
         Shader shader;
         shader.CreateFromFile("shaders/stars.vert", "shaders/stars.frag");
@@ -122,21 +128,20 @@ int main()
         renderer.init(stars);
 
         Renderer galaxyRenderer;
-        galaxyRenderer.init(galaxy);
-        float galaxyFluxScale = 100.0f;
+        if (hasGalaxy) {
+            galaxyRenderer.init(galaxy);
+        }
 
-        // Camera at the Sun, looking down -z. Speed is in parsecs per second.
         // Camera at the Sun, looking toward the galactic center (+X).
-        camera = Camera(glm::vec3(-8122.0f, 21.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),0.0f, 0.0f, 200.0f, 0.1f);
+        // Positions are in parsecs, speed in parsecs per second.
+        camera = Camera(glm::vec3(-8122.0f, 21.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+                        0.0f, 0.0f, 200.0f, 0.1f);
 
         // Additive blending: overlapping stars add up to brighter light.
         glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         glDisable(GL_DEPTH_TEST);
-
-        double lastTime = glfwGetTime();
-        float refMag = 16.0f;
 
         int fbW, fbH;
         glfwGetFramebufferSize(window, &fbW, &fbH);
@@ -146,36 +151,64 @@ int main()
         Framebuffer bloomFbo[2];
         bloomFbo[0].create(fbW / 2, fbH / 2);
         bloomFbo[1].create(fbW / 2, fbH / 2);
-        float bloomStrength  = 0.6f;
-        float bloomThreshold = 1.0f;
-        const int blurPasses = 5;
 
         Shader composite;
         composite.CreateFromFile("shaders/fullscreen.vert", "shaders/composite.frag");
 
         Shader bright;
-        bright.CreateFromFile("shaders/fullscreen.vert","shaders/bright.frag");
+        bright.CreateFromFile("shaders/fullscreen.vert", "shaders/bright.frag");
 
         Shader blur;
-        blur.CreateFromFile("shaders/fullscreen.vert","shaders/blur.frag");
+        blur.CreateFromFile("shaders/fullscreen.vert", "shaders/blur.frag");
 
         GLuint emptyVao = 0;
         glGenVertexArrays(1, &emptyVao);   // core profile needs a VAO even with no vertex data
 
-        float exposure = 1.0f;
+        // Tunable parameters (adjusted with the arrow keys or edited here).
+        float refMag           = 16.0f;
+        float exposure         = 1.0f;
+        float bloomStrength    = 0.6f;
+        float bloomThreshold   = 1.0f;
+        const int blurPasses   = 5;
+        float galaxyFluxScale  = 100.0f;
+
+        // Timing and FPS counter.
+        double lastTime  = glfwGetTime();
+        double fpsTimer  = lastTime;
+        int    frameCount = 0;
 
         while (!glfwWindowShouldClose(window)) {
             double now = glfwGetTime();
             float deltaTime = static_cast<float>(now - lastTime);
             lastTime = now;
 
-            if (keys[GLFW_KEY_UP])   refMag += 4.0f * deltaTime;
-            if (keys[GLFW_KEY_DOWN]) refMag -= 4.0f * deltaTime;
+            if (keys[GLFW_KEY_UP])    refMag   += 4.0f * deltaTime;
+            if (keys[GLFW_KEY_DOWN])  refMag   -= 4.0f * deltaTime;
             if (keys[GLFW_KEY_RIGHT]) exposure *= 1.0f + 1.5f * deltaTime;
             if (keys[GLFW_KEY_LEFT])  exposure /= 1.0f + 1.5f * deltaTime;
 
             glfwPollEvents();
             camera.keyControl(keys, deltaTime);
+
+            // --- Update the window title with live stats twice a second ---
+            ++frameCount;
+            if (now - fpsTimer >= 0.5) {
+                double fps = frameCount / (now - fpsTimer);
+                float distToCenter = glm::length(camera.getCameraPosition());
+
+                char title[256];
+                std::snprintf(title, sizeof(title),
+                              "Gaia Galaxy | %.0f FPS (%.1f ms) | %zu stars (%zu Gaia + %zu procedural) | "
+                              "speed %.0f pc/s | %.2f kpc from center | refMag %.1f | exposure %.2f",
+                              fps, 1000.0 / fps,
+                              gaiaCount + galaxyCount, gaiaCount, galaxyCount,
+                              camera.getMoveSpeed(), distToCenter / 1000.0f,
+                              refMag, exposure);
+                glfwSetWindowTitle(window, title);
+
+                fpsTimer   = now;
+                frameCount = 0;
+            }
 
             int w, h;
             glfwGetFramebufferSize(window, &w, &h);
@@ -203,15 +236,18 @@ int main()
             shader.SetMat4("uView", camera.calculateViewMatrix());
             shader.SetMat4("uProjection", projection);
             shader.SetFloat("uRefMag", refMag);
-            shader.SetFloat("uPointScale", 3.0f);
-            
+
+            // Layer 1: real Gaia stars.
             shader.SetFloat("uFluxScale", 1.0f);
             shader.SetFloat("uPointScale", 3.0f);
-            renderer.draw();                           // real Gaia stars
+            renderer.draw();
 
-            shader.SetFloat("uFluxScale", galaxyFluxScale);
-            shader.SetFloat("uPointScale", 1.0f);
-            galaxyRenderer.draw();                     // procedural galaxy layer
+            // Layer 2: procedural galaxy.
+            if (hasGalaxy) {
+                shader.SetFloat("uFluxScale", galaxyFluxScale);
+                shader.SetFloat("uPointScale", 1.0f);
+                galaxyRenderer.draw();
+            }
 
             // --- Bloom: bright pass (HDR -> bloomFbo[0]) ---
             glDisable(GL_BLEND);
@@ -240,20 +276,20 @@ int main()
             }
             glBindVertexArray(0);
 
-            // --- Pass 2: tone map the HDR texture onto the screen ---
+            // --- Pass 2: composite HDR + bloom, tone map onto the screen ---
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, w, h);
             glDisable(GL_BLEND);
             glClear(GL_COLOR_BUFFER_BIT);
 
             composite.UseShader();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
-            composite.SetFloat("uExposure", exposure);
             composite.SetInt("uHdrTexture", 0);
             composite.SetInt("uBloomTexture", 1);
+            composite.SetFloat("uExposure", exposure);
             composite.SetFloat("uBloomStrength", bloomStrength);
 
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, bloomFbo[0].colorTexture());
             glActiveTexture(GL_TEXTURE0);
@@ -264,9 +300,10 @@ int main()
 
             glfwSwapBuffers(window);
         }
+
         glDeleteVertexArrays(1, &emptyVao);
     }
-    
+
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
