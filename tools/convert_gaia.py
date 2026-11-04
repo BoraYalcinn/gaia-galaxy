@@ -11,7 +11,7 @@ Layout of one star (28 bytes):
 
 import numpy as np
 import astropy.units as u
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Galactocentric
 from astropy.table import Table
 
 INPUT_PATH = "data/gaia_raw.fits"
@@ -58,9 +58,18 @@ def main():
     # galactic pole). .cartesian gives x, y, z instead of angles.
     coords = SkyCoord(ra=ra * u.deg, dec=dec * u.deg,distance=distance_pc * u.pc, frame="icrs")
     xyz = coords.galactic.cartesian
-    x = xyz.x.to_value(u.pc)
-    y = xyz.y.to_value(u.pc)
-    z = xyz.z.to_value(u.pc)
+    
+    # Galactocentric frame: origin at the galactic center, Sun about 8.1 kpc away.
+    gc = coords.transform_to(Galactocentric())
+    gx = gc.x.to_value(u.pc)
+    gy = gc.y.to_value(u.pc)
+    gz = gc.z.to_value(u.pc)
+
+    # The renderer uses +Y as "up". Remap so galactic north is up and the disk
+    # lies flat in the XZ plane:  (x, y, z) -> (x, z, -y)  (still right-handed).
+    x = gx
+    y = gz
+    z = -gy
 
     # Absolute magnitude: how bright the star would look from 10 pc.
     # M = G + 5*log10(parallax_mas) - 10

@@ -61,6 +61,7 @@ static void scrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yo
 
 int main()
 {
+
     // Load star data first (does not need OpenGL).
     std::vector<float> stars = loadStars("data/stars.bin");
     if (stars.empty()) {
@@ -120,8 +121,8 @@ int main()
         renderer.init(stars);
 
         // Camera at the Sun, looking down -z. Speed is in parsecs per second.
-        camera = Camera(glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
-                        -90.0f, 0.0f, 200.0f, 0.1f);
+        // Camera at the Sun, looking toward the galactic center (+X).
+        camera = Camera(glm::vec3(-8122.0f, 21.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),0.0f, 0.0f, 200.0f, 0.1f);
 
         // Additive blending: overlapping stars add up to brighter light.
         glEnable(GL_PROGRAM_POINT_SIZE);
