@@ -137,9 +137,21 @@ int main()
 
         Framebuffer hdr;
         hdr.create(fbW, fbH);
+        Framebuffer bloomFbo[2];
+        bloomFbo[0].create(fbW / 2, fbH / 2);
+        bloomFbo[1].create(fbW / 2, fbH / 2);
+        float bloomStrength  = 0.6f;
+        float bloomThreshold = 1.0f;
+        const int blurPasses = 5;
 
         Shader composite;
         composite.CreateFromFile("shaders/fullscreen.vert", "shaders/composite.frag");
+
+        Shader bright;
+        bright.CreateFromFile("shaders/fullscreen.vert","shaders/bright.frag");
+
+        Shader blur;
+        blur.CreateFromFile("shaders/fullscreen.vert","shaders/blur.frag");
 
         GLuint emptyVao = 0;
         glGenVertexArrays(1, &emptyVao);   // core profile needs a VAO even with no vertex data
@@ -165,6 +177,8 @@ int main()
 
             if (w != hdr.width() || h != hdr.height()) {
                 hdr.create(w, h);   // window was resized
+                bloomFbo[0].create(w / 2, h / 2);
+                bloomFbo[1].create(w / 2, h / 2);
             }
 
             // --- Pass 1: draw the stars into the HDR texture ---
@@ -186,6 +200,33 @@ int main()
             shader.SetFloat("uPointScale", 3.0f);
             renderer.draw();
 
+            // --- Bloom: bright pass (HDR -> bloomFbo[0]) ---
+            glDisable(GL_BLEND);
+            glBindVertexArray(emptyVao);
+
+            bloomFbo[0].bind();
+            bright.UseShader();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
+            bright.SetFloat("uThreshold", bloomThreshold);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            // --- Bloom: blur, ping-pong between the two framebuffers ---
+            blur.UseShader();
+            glm::vec2 texel(1.0f / bloomFbo[0].width(), 1.0f / bloomFbo[0].height());
+            for (int i = 0; i < blurPasses; ++i) {
+                bloomFbo[1].bind();                                   // horizontal
+                glBindTexture(GL_TEXTURE_2D, bloomFbo[0].colorTexture());
+                blur.SetVec2("uDirection", glm::vec2(texel.x, 0.0f));
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+
+                bloomFbo[0].bind();                                   // vertical
+                glBindTexture(GL_TEXTURE_2D, bloomFbo[1].colorTexture());
+                blur.SetVec2("uDirection", glm::vec2(0.0f, texel.y));
+                glDrawArrays(GL_TRIANGLES, 0, 3);
+            }
+            glBindVertexArray(0);
+
             // --- Pass 2: tone map the HDR texture onto the screen ---
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glViewport(0, 0, w, h);
@@ -196,6 +237,14 @@ int main()
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
             composite.SetFloat("uExposure", exposure);
+            composite.SetInt("uHdrTexture", 0);
+            composite.SetInt("uBloomTexture", 1);
+            composite.SetFloat("uBloomStrength", bloomStrength);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, bloomFbo[0].colorTexture());
+            glActiveTexture(GL_TEXTURE0);
+
             glBindVertexArray(emptyVao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);

@@ -22,6 +22,8 @@ class Shader{
         void CreateFromFile(const char* vertexLocation,const char* fragmentLocation);
         void SetFloat(const char* name, float value);
         void SetMat4(const char* name, const glm::mat4& value);
+        void SetInt(const char* name,int value);
+        void SetVec2(const char* name,const glm::vec2& value);
         
         std::string ReadFile(const char* fileLocation);
 
