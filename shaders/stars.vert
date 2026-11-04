@@ -26,7 +26,7 @@ void main()
 
     // Magnitudes are logarithmic: 5 magnitudes = factor of 100 in flux.
     float flux = pow(10.0, -0.4 * (m - uRefMag));
-    flux = clamp(flux, 0.0, 8.0);
+    flux = clamp(flux, 0.0, 1000.0);
 
     vColor = aColor;
     vFlux  = flux;

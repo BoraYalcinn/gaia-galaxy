@@ -12,6 +12,7 @@
 #include "renderer.h"
 #include "shader.h"
 #include "star_loader.h"
+#include "framebuffer.h"
 
 // --- Input state (written by GLFW callbacks, read in the main loop) ---
 static bool   keys[1024] = {};
@@ -130,6 +131,12 @@ int main()
 
         double lastTime = glfwGetTime();
         float refMag = 16.0f;
+
+        int fbW, fbH;
+        glfwGetFramebufferSize(window, &fbW, &fbH);
+
+        Framebuffer hdr;
+        hdr.create(fbW, fbH);
 
         while (!glfwWindowShouldClose(window)) {
             double now = glfwGetTime();
