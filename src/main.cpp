@@ -237,6 +237,11 @@ int main()
             shader.SetMat4("uProjection", projection);
             shader.SetFloat("uRefMag", refMag);
 
+            // before drawing Gaia
+            shader.SetFloat("uDistanceFalloff", 1.0f);
+            // before drawing the procedural galaxy
+            shader.SetFloat("uDistanceFalloff", 0.0f);
+
             // Layer 1: real Gaia stars.
             shader.SetFloat("uFluxScale", 1.0f);
             shader.SetFloat("uPointScale", 3.0f);
