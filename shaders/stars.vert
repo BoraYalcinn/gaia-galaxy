@@ -9,6 +9,7 @@ uniform mat4  uView;
 uniform mat4  uProjection;
 uniform float uRefMag;      // apparent magnitude that maps to brightness 1.0
 uniform float uPointScale;  // how much brighter stars grow in size
+uniform float uFluxScale;
 
 out vec3  vColor;
 out float vFlux;
@@ -25,8 +26,9 @@ void main()
     float m = aAbsMag + 5.0 * log2(d) / log2(10.0) - 5.0;
 
     // Magnitudes are logarithmic: 5 magnitudes = factor of 100 in flux.
-    float flux = pow(10.0, -0.4 * (m - uRefMag));
+    float flux = pow(10.0, -0.4 * (m - uRefMag)) * uFluxScale;
     flux = clamp(flux, 0.0, 1000.0);
+    
 
     vColor = aColor;
     vFlux  = flux;

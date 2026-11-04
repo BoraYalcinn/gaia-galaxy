@@ -64,6 +64,7 @@ int main()
 
     // Load star data first (does not need OpenGL).
     std::vector<float> stars = loadStars("data/stars.bin");
+    std::vector<float> galaxy = loadStars("data/galaxy.bin");
     if (stars.empty()) {
         std::fprintf(stderr, "No stars loaded. Run the Python tools first.\n");
         return 1;
@@ -119,6 +120,10 @@ int main()
 
         Renderer renderer;
         renderer.init(stars);
+
+        Renderer galaxyRenderer;
+        galaxyRenderer.init(galaxy);
+        float galaxyFluxScale = 100.0f;
 
         // Camera at the Sun, looking down -z. Speed is in parsecs per second.
         // Camera at the Sun, looking toward the galactic center (+X).
@@ -199,7 +204,14 @@ int main()
             shader.SetMat4("uProjection", projection);
             shader.SetFloat("uRefMag", refMag);
             shader.SetFloat("uPointScale", 3.0f);
-            renderer.draw();
+            
+            shader.SetFloat("uFluxScale", 1.0f);
+            shader.SetFloat("uPointScale", 3.0f);
+            renderer.draw();                           // real Gaia stars
+
+            shader.SetFloat("uFluxScale", galaxyFluxScale);
+            shader.SetFloat("uPointScale", 1.0f);
+            galaxyRenderer.draw();                     // procedural galaxy layer
 
             // --- Bloom: bright pass (HDR -> bloomFbo[0]) ---
             glDisable(GL_BLEND);
