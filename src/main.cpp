@@ -54,7 +54,7 @@ static void scrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yo
 {
     // Each scroll step multiplies the speed by 1.2 (or divides when scrolling back).
     float speed = camera.getMoveSpeed() * std::pow(1.2f, static_cast<float>(yoffset));
-    speed = glm::clamp(speed, 1.0f, 20000.0f);
+    speed = glm::clamp(speed, 1.0f, 500000.0f);
     camera.setMoveSpeed(speed);
 }
 
@@ -229,8 +229,7 @@ int main()
             glBlendFunc(GL_ONE, GL_ONE);
 
             float aspect = static_cast<float>(w) / static_cast<float>(h);
-            glm::mat4 projection =
-                glm::perspective(glm::radians(60.0f), aspect, 0.1f, 100000.0f);
+            glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspect, 1.0f, 100000000.0f);
 
             shader.UseShader();
             shader.SetMat4("uView", camera.calculateViewMatrix());
@@ -292,6 +291,20 @@ int main()
             composite.SetInt("uBloomTexture", 1);
             composite.SetFloat("uExposure", exposure);
             composite.SetFloat("uBloomStrength", bloomStrength);
+
+            // Layer 1: real Gaia stars (physical 1/d^2 falloff).
+            shader.SetFloat("uDistanceFalloff", 1.0f);
+            shader.SetFloat("uFluxScale", 1.0f);
+            shader.SetFloat("uPointScale", 3.0f);
+            renderer.draw();
+
+            // Layer 2: procedural galaxy (flat brightness).
+            if (hasGalaxy) {
+                shader.SetFloat("uDistanceFalloff", 0.0f);
+                shader.SetFloat("uFluxScale", galaxyFluxScale);
+                shader.SetFloat("uPointScale", 1.0f);
+                galaxyRenderer.draw();
+            }
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, hdr.colorTexture());
