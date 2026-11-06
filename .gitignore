@@ -216,6 +216,12 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# Videos (host on YouTube or GitHub attachments instead)
+*.mp4
+*.mkv
+*.webm
+*.mov
+
 # Streamlit
 .streamlit/secrets.toml
 
@@ -257,3 +263,9 @@ compile_commands.json
 
 # Gaia data
 data/
+
+# Videos (host on YouTube or GitHub attachments instead)
+*.mp4
+*.mkv
+*.webm
+*.mov
