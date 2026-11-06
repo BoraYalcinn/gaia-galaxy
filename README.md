@@ -29,11 +29,14 @@ Both images are shown at the same height so they line up.
   </tr>
 </table>
 
-Right: artist's concept of the Milky Way with the Sun marked . The procedural layer is an illustrative model inspired by this structure: a central bar, two major and two minor spiral arms, and a thin disk. It is not a map of the real Milky Way.
+<p align="center"><em>Tried my best to replicate.</em></p>
+
+Right: artist's concept of the Milky Way with the Sun marked (credit: NASA/JPL-Caltech/R. Hurt, SSC/Caltech). The procedural layer is an illustrative model inspired by this structure: a central bar, two major and two minor spiral arms, and a thin disk. It is not a map of the real Milky Way.
 
 ## Video
 
-<video controls src="2026-11-06 13-33-02.mp4" title="Title"></video>
+<!-- VIDEO_PLACEHOLDER: add the demo video link here -->
+*Demo video coming soon.*
 
 A short fly-through: from the Sun through the Gaia stars, up above the disk, out to the Magellanic Clouds, Andromeda, and the galaxy groups beyond.
 
@@ -41,16 +44,16 @@ A short fly-through: from the Sun through the Gaia stars, up above the disk, out
 
 <table>
   <tr>
-    <td align="center"><img src="docs/gallery/image-1.png" width="400"><br><sub></sub></td>
-    <td align="center"><img src="docs/gallery/image-2.png" width="400"><br><sub></sub></td>
+    <td align="center"><img src="docs/gallery/image-1.png" width="400" alt="Gaia stars around the Sun"><br><sub>Gaia stars around the Sun</sub></td>
+    <td align="center"><img src="docs/gallery/image-2.png" width="400" alt="The Milky Way seen from above"><br><sub>The procedural Milky Way from above</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/gallery/image-3.png" width="400"><br><sub></sub></td>
-    <td align="center"><img src="docs/gallery/image-4.png" width="400"><br><sub></sub></td>
+    <td align="center"><img src="docs/gallery/image-3.png" width="400" alt="Central bar and bulge"><br><sub>Central bar and bulge</sub></td>
+    <td align="center"><img src="docs/gallery/image-4.png" width="400" alt="The Magellanic Clouds"><br><sub>The Large and Small Magellanic Clouds</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/gallery/image-5.png" width="400"><br><sub></sub></td>
-    <td align="center"><img src="docs/gallery/image-6.png" width="400"><br><sub>Field galaxies toward the Virgo cluster</sub></td>
+    <td align="center"><img src="docs/gallery/image-5.png" width="400" alt="Andromeda and Triangulum"><br><sub>Andromeda (M31) and Triangulum (M33)</sub></td>
+    <td align="center"><img src="docs/gallery/image-6.png" width="400" alt="Field galaxies toward the Virgo cluster"><br><sub>Field galaxies toward the Virgo cluster</sub></td>
   </tr>
 </table>
 
