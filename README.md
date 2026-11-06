@@ -44,16 +44,16 @@ A short fly-through: from the Sun through the Gaia stars, up above the disk, out
 
 <table>
   <tr>
-    <td align="center"><img src="docs/gallery/image-1.png" width="400" alt="Gaia stars around the Sun"><br><sub>Gaia stars around the Sun</sub></td>
-    <td align="center"><img src="docs/gallery/image-2.png" width="400" alt="The Milky Way seen from above"><br><sub>The procedural Milky Way from above</sub></td>
+    <td align="center"><img src="docs/gallery/image-1.png" width="400" alt="Gaia stars around the Sun"><br><sub></sub></td>
+    <td align="center"><img src="docs/gallery/image-2.png" width="400" alt="The Milky Way seen from above"><br><sub></sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/gallery/image-3.png" width="400" alt="Central bar and bulge"><br><sub>Central bar and bulge</sub></td>
-    <td align="center"><img src="docs/gallery/image-4.png" width="400" alt="The Magellanic Clouds"><br><sub>The Large and Small Magellanic Clouds</sub></td>
+    <td align="center"><img src="docs/gallery/image-3.png" width="400" alt="Central bar and bulge"><br><sub></sub></td>
+    <td align="center"><img src="docs/gallery/image-4.png" width="400" alt="The Magellanic Clouds"><br><sub></sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/gallery/image-5.png" width="400" alt="Andromeda and Triangulum"><br><sub>Andromeda (M31) and Triangulum (M33)</sub></td>
-    <td align="center"><img src="docs/gallery/image-6.png" width="400" alt="Field galaxies toward the Virgo cluster"><br><sub>Field galaxies toward the Virgo cluster</sub></td>
+    <td align="center"><img src="docs/gallery/image-5.png" width="400" alt="Andromeda and Triangulum"><br><sub></sub></td>
+    <td align="center"><img src="docs/gallery/image-6.png" width="400" alt="Field galaxies toward the Virgo cluster"><br><sub></sub></td>
   </tr>
 </table>
 
